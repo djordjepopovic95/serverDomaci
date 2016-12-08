@@ -14,9 +14,9 @@ public class Server {
 			ServerSocket serverSoket = new ServerSocket(port);
 			while(true){
 				soket = serverSoket.accept();
-				klijenti.add(new ServerNit(soket, klijenti));
+				klijenti.addLast(new ServerNit(soket, klijenti));
 				klijenti.getLast().start();
-				break;
+				//break;
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
