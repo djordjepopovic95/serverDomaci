@@ -41,6 +41,10 @@ public class ServerNit extends Thread {
 		return adr;
 	}
 
+	public Socket getSoketZaKomunikaciju() {
+		return soketZaKomunikaciju;
+	}
+
 	@Override
 	public void run() {
 		String linija;
@@ -73,7 +77,7 @@ public class ServerNit extends Thread {
 					break;
 				}
 
-			//	linija = "///linija" + linija;
+				
 
 				izlazniTokKaKlijentu.println("Kome saljete poruku?");
 
@@ -100,22 +104,16 @@ public class ServerNit extends Thread {
 
 				for (int i = 0; i < klijenti.size(); i++) {
 					if (to.contains(klijenti.get(i).getIme())) {
+						if (klijenti.get(i).getSoketZaKomunikaciju().isConnected()){
 						klijenti.get(i).izlazniTokKaKlijentu.println("[" + ime + "]: " + linija);
-					//	if (klijenti.get(i).ulazniTokOdKlijenta.readLine().equals("///potvrda")) {
-					//		potvrda[i] = 1;
-					//	}
-						// fali upisivanje podataka u fajl
-						// izbaci potvrdu iz zadatka pa je uradi naknadno
+						
+						}else{
+							izlazniTokKaKlijentu.println("Nije moguce poslati poruku> " + klijenti.get(i).getIme());
+						}					
+						
 					}
 				}
-/*
-				for (int i = 0; i < potvrda.length; i++) {
-					if (potvrda[i] != 1) {
-						izlazniTokKaKlijentu.println("Poruka nije dostavljena klijentu: " + klijenti.get(i).getIme());
-					}
-					potvrda[i] = 0;
-				}
-*/
+				
 			}
 			for (int i = 0; i < klijenti.size(); i++) {
 				if (klijenti.get(i) != this) {
