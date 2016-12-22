@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.*;
+import java.util.Date;
 import java.util.LinkedList;
 
 import javax.swing.SingleSelectionModel;
@@ -17,6 +18,7 @@ public class ServerNit extends Thread {
 	static String listaKlijenata = "";
 	int port;
 	InetAddress adr;
+
 	// PrintWriter out;
 
 	public ServerNit(Socket soket, LinkedList<ServerNit> klijenti, DatagramSocket dSoket) {
@@ -50,13 +52,11 @@ public class ServerNit extends Thread {
 		String linija;
 		String to;
 
-		int postoji = 0;
-
 		try {
 			ulazniTokOdKlijenta = new BufferedReader(new InputStreamReader(soketZaKomunikaciju.getInputStream()));
 			izlazniTokKaKlijentu = new PrintStream(soketZaKomunikaciju.getOutputStream());
-			// out = new
-			// PrintWriter("D:\\Faks\\Treæa\\RMT\\podaciSaServera.txt");
+			PrintWriter out = new PrintWriter(
+					new BufferedWriter(new FileWriter("D:\\Faks\\Treæa\\RMT\\poruke.txt", true)));
 
 			getInformationUDP();
 
@@ -65,8 +65,8 @@ public class ServerNit extends Thread {
 			izlazniTokKaKlijentu.println("Unesite pol (M/Z): ");
 			pol = ulazniTokOdKlijenta.readLine();
 			pol = pol.toUpperCase();
-			
-			while(!(pol.equals("Z") || pol.equals("M"))){
+
+			while (!(pol.equals("Z") || pol.equals("M"))) {
 				izlazniTokKaKlijentu.println("Greska pri unosu pola, ponovite unos.");
 				pol = ulazniTokOdKlijenta.readLine();
 				pol = pol.toUpperCase();
@@ -81,8 +81,6 @@ public class ServerNit extends Thread {
 					kraj = true;
 					break;
 				}
-
-				
 
 				izlazniTokKaKlijentu.println("Kome saljete poruku?");
 
@@ -105,34 +103,46 @@ public class ServerNit extends Thread {
 				System.out.println(listaKlijenata);
 
 				to = ulazniTokOdKlijenta.readLine();
-				for(int i = 0; i < klijenti.size(); i++){
-					if (to.contains(klijenti.get(i).getIme())){
-						postoji++;
+				String[] provera = to.split(" ");
+				int[] niz = new int[provera.length];
+
+				for (int j = 0; j < provera.length; j++) {
+					for (int i = 0; i < klijenti.size(); i++) {
+						if (provera[j].equals(klijenti.get(i).getIme())) {
+							niz[j] = 1;
+						}
 					}
 				}
-				
-				if (postoji == 0){
-					izlazniTokKaKlijentu.println("Niste uneli ime sa liste ili je klijent napustio chat. Ponovite slanje.");
-					continue;
-				} else {
-					postoji = 0;
+
+				String zaUpis = "Poruka: " + linija + ";\n" + "Primaoci: " + to + ";\n" + "Vreme: "
+						+ new Date().toString() + ";\n";
+
+				for (int j = 0; j < provera.length; j++) {
+					if (niz[j] == 0) {
+						izlazniTokKaKlijentu.println("Korisnik " + provera[j] + " nije online.");
+						zaUpis = zaUpis + "Greska: Korisnik " + provera[j] + " nije online;\n";
+					} else {
+						niz[j] = 0;
+					}
 				}
-				
+
 				System.out.println(to);
 
 				for (int i = 0; i < klijenti.size(); i++) {
 					if (to.contains(klijenti.get(i).getIme())) {
-						if (!klijenti.get(i).getSoketZaKomunikaciju().isClosed()){
-						klijenti.get(i).izlazniTokKaKlijentu.println("[" + ime + "]: " + linija);
-						System.out.println("ovo se izvrsava");
-						}else{
+						if (!klijenti.get(i).getSoketZaKomunikaciju().isClosed()) {
+							klijenti.get(i).izlazniTokKaKlijentu.println("[" + ime + "]: " + linija);
+							System.out.println("ovo se izvrsava");
+						} else {
 							izlazniTokKaKlijentu.println("Nije moguce poslati poruku> " + klijenti.get(i).getIme());
-						}					
-						
+						}
+
 					}
 				}
-				
-			}
+
+				out.println(zaUpis);
+
+			} // zatvoren while
 			for (int i = 0; i < klijenti.size(); i++) {
 				if (klijenti.get(i) != this) {
 					klijenti.get(i).izlazniTokKaKlijentu.println("Korisnik " + ime + " je napustio sobu.");
@@ -140,7 +150,7 @@ public class ServerNit extends Thread {
 			}
 
 			izlazniTokKaKlijentu.println("///Dovidjenja!");
-
+			out.close();
 			soketZaKomunikaciju.close();
 
 		} catch (IOException e) {
