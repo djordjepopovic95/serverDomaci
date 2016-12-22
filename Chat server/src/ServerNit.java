@@ -48,10 +48,9 @@ public class ServerNit extends Thread {
 	@Override
 	public void run() {
 		String linija;
-
 		String to;
 
-		int[] potvrda = new int[klijenti.size()];
+		int postoji = 0;
 
 		try {
 			ulazniTokOdKlijenta = new BufferedReader(new InputStreamReader(soketZaKomunikaciju.getInputStream()));
@@ -66,6 +65,12 @@ public class ServerNit extends Thread {
 			izlazniTokKaKlijentu.println("Unesite pol (M/Z): ");
 			pol = ulazniTokOdKlijenta.readLine();
 			pol = pol.toUpperCase();
+			
+			while(!(pol.equals("Z") || pol.equals("M"))){
+				izlazniTokKaKlijentu.println("Greska pri unosu pola, ponovite unos.");
+				pol = ulazniTokOdKlijenta.readLine();
+				pol = pol.toUpperCase();
+			}
 
 			izlazniTokKaKlijentu.println("Zdravo, " + ime + ". Za izlaz unesite ///quit.");
 
@@ -100,13 +105,26 @@ public class ServerNit extends Thread {
 				System.out.println(listaKlijenata);
 
 				to = ulazniTokOdKlijenta.readLine();
+				for(int i = 0; i < klijenti.size(); i++){
+					if (to.contains(klijenti.get(i).getIme())){
+						postoji++;
+					}
+				}
+				
+				if (postoji == 0){
+					izlazniTokKaKlijentu.println("Niste uneli ime sa liste ili je klijent napustio chat. Ponovite slanje.");
+					continue;
+				} else {
+					postoji = 0;
+				}
+				
 				System.out.println(to);
 
 				for (int i = 0; i < klijenti.size(); i++) {
 					if (to.contains(klijenti.get(i).getIme())) {
-						if (klijenti.get(i).getSoketZaKomunikaciju().isConnected()){
+						if (!klijenti.get(i).getSoketZaKomunikaciju().isClosed()){
 						klijenti.get(i).izlazniTokKaKlijentu.println("[" + ime + "]: " + linija);
-						
+						System.out.println("ovo se izvrsava");
 						}else{
 							izlazniTokKaKlijentu.println("Nije moguce poslati poruku> " + klijenti.get(i).getIme());
 						}					
