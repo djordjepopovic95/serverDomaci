@@ -19,8 +19,6 @@ public class ServerNit extends Thread {
 	int port;
 	InetAddress adr;
 
-	// PrintWriter out;
-
 	public ServerNit(Socket soket, LinkedList<ServerNit> klijenti, DatagramSocket dSoket) {
 		this.soketZaKomunikaciju = soket;
 		this.klijenti = klijenti;
@@ -86,8 +84,10 @@ public class ServerNit extends Thread {
 
 				listaKlijenata = "";
 				for (int i = 0; i < klijenti.size(); i++) {
-					if (!klijenti.get(i).getPol().equals(pol)) {
-						listaKlijenata = listaKlijenata + klijenti.get(i).getIme() + " ";
+					if (klijenti.get(i).getPol() != null) {
+						if (!klijenti.get(i).getPol().equals(pol)) {
+							listaKlijenata = listaKlijenata + klijenti.get(i).getIme() + " ";
+						}
 					}
 				}
 
@@ -96,11 +96,11 @@ public class ServerNit extends Thread {
 				podaciZaKlijenta = listaKlijenata.getBytes();
 
 				DatagramPacket dPaket = new DatagramPacket(podaciZaKlijenta, podaciZaKlijenta.length, adr, port);
-				System.out.println(port);
+				// System.out.println(port);
 				dSoket.send(dPaket);
 
-				System.out.println("poslat datagram");
-				System.out.println(listaKlijenata);
+				// System.out.println("poslat datagram");
+				// System.out.println(listaKlijenata);
 
 				to = ulazniTokOdKlijenta.readLine();
 				String[] provera = to.split(" ");
@@ -114,8 +114,8 @@ public class ServerNit extends Thread {
 					}
 				}
 
-				String zaUpis = "Poruka: " + linija + ";\n" + "Primaoci: " + to + ";\n" + "Vreme: "
-						+ new Date().toString() + ";\n";
+				String zaUpis = "Poruka: " + linija + "; \n " + "Primaoci: " + to + "; \n " + "Vreme: "
+						+ new Date().toString() + "; \n ";
 
 				for (int j = 0; j < provera.length; j++) {
 					if (niz[j] == 0) {
@@ -126,13 +126,13 @@ public class ServerNit extends Thread {
 					}
 				}
 
-				System.out.println(to);
+				// System.out.println(to);
 
 				for (int i = 0; i < klijenti.size(); i++) {
 					if (to.contains(klijenti.get(i).getIme())) {
 						if (!klijenti.get(i).getSoketZaKomunikaciju().isClosed()) {
 							klijenti.get(i).izlazniTokKaKlijentu.println("[" + ime + "]: " + linija);
-							System.out.println("ovo se izvrsava");
+							// System.out.println("ovo se izvrsava");
 						} else {
 							izlazniTokKaKlijentu.println("Nije moguce poslati poruku> " + klijenti.get(i).getIme());
 						}
@@ -171,17 +171,17 @@ public class ServerNit extends Thread {
 				while (!kraj) {
 					try {
 
-						System.out.println("Usao u petlju");
+						// System.out.println("Usao u petlju");
 
 						byte[] podaciOdKlijenta = new byte[1024];
 
 						DatagramPacket paketOdKlijenta = new DatagramPacket(podaciOdKlijenta, podaciOdKlijenta.length);
 						dSoket.receive(paketOdKlijenta);
-						System.out.println("Primio paket.");
+						// System.out.println("Primio paket.");
 						adr = paketOdKlijenta.getAddress();
-						System.out.println("Adresa> " + adr);
+						// System.out.println("Adresa> " + adr);
 						port = paketOdKlijenta.getPort();
-						System.out.println("Port> " + port);
+						// System.out.println("Port> " + port);
 
 					} catch (SocketException e) {
 						// TODO Auto-generated catch block
